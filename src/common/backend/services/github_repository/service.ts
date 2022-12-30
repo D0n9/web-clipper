@@ -85,8 +85,8 @@ export default class GithubRepositoryDocumentService implements DocumentService 
 
     if (isUndefined(this.config.savePath)) this.config.savePath = '';
     if (this.config.savePath.startsWith('/')) this.config.savePath.substr(1);
-    if (!this.config.savePath.endsWith('/') && this.config.savePath.length > 0)
-      this.config.savePath += '/';
+    if (this.config.savePath.endsWith('/') && this.config.savePath.length > 0)
+      this.config.savePath = this.config.savePath.replace(/\//g, '');
 
     let b64EncodeUnicode = (str: string) => {
       return btoa(
@@ -99,7 +99,10 @@ export default class GithubRepositoryDocumentService implements DocumentService 
 
     let fileName: string = fileNamify(title, { replacement: ' ' });
 
-    let requestPath: string = `/repos/${repository.namespace}/contents/${this.config.savePath}${fileName}.md`;
+    let currentYear: string = new Date().getFullYear().toString();
+    let currentMonth: string = (new Date().getMonth() + 1).toString();
+
+    let requestPath: string = `/repos/${repository.namespace}/contents/${this.config.savePath}/${currentYear}/${currentMonth}/${fileName}.md`;
 
     const response = await this.request
       .put<{

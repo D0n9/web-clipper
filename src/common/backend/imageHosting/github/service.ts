@@ -53,20 +53,18 @@ export default class GithubImageHostingService implements ImageHostingService {
     const [username, repo] = this.config.repo.split('/');
     if (isUndefined(this.config.savePath)) this.config.savePath = '';
     if (this.config.savePath.startsWith('/')) this.config.savePath.substr(1);
-    if (!this.config.savePath.endsWith('/') && this.config.savePath.length > 0)
-      this.config.savePath += '/';
+    if (this.config.savePath.endsWith('/') && this.config.savePath.length > 0)
+      this.config.savePath = this.config.savePath.replace(/\//g, '');
 
     const fileName = this.generateFilename(data);
-    const folderName = this.date
-      .toLocaleString('chinese', { hour12: false })
-      .replace(new RegExp('/', 'g'), '-')
-      .replace(new RegExp(':', 'g'), '-');
+    let currentYear: string = new Date().getFullYear().toString();
+    let currentMonth: string = (new Date().getMonth() + 1).toString();
     const filteredImage = data.replace(/^data:image\/.*;base64,/, '');
     const response = await this.githubClient.uploadFile({
       owner: username,
       repo,
       branch: this.config.branch,
-      path: `${this.config.savePath}${folderName}/${fileName}`,
+      path: `${this.config.savePath}/${currentYear}/${currentMonth}/${fileName}`,
       message: `Upload image "${fileName}"`,
       content: filteredImage,
     });
